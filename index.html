@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#0f0f0f;color:#f0ede8">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#0f0f0f"/>
+<title>Garage Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --bg3: #242424;
+  --border: #2e2e2e;
+  --text: #f0ede8;
+  --muted: #7a7772;
+  --green: #4ade80;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --accent: #e8d5a3;
+  --font: 'Barlow', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 10px;
+}
+
+html, body {
+  background: #0f0f0f;
+  background-color: #0f0f0f;
+  color: #f0ede8;
+  font-family: var(--font);
+  font-size: 16px;
+  min-height: 100vh;
+}
+
+#app { max-width: 640px; margin: 0 auto; padding-bottom: 3rem; }
+
+/* HEADER */
+header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+}
+.brand { display: flex; align-items: center; gap: 0.5rem; }
+.brand-icon { font-size: 1.4rem; }
+.brand-name { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.01em; color: var(--accent); }
+
+.week-nav { display: flex; align-items: center; gap: 0.5rem; }
+.nav-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-btn:active { opacity: 0.7; }
+.week-label { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+/* SUMMARY BAR */
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+}
+.stat {
+  padding: 0.6rem 0.75rem;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat:last-child { border-right: none; }
+.stat.highlight { background: var(--bg3); }
+.stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.stat-value { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; color: var(--text); }
+.stat-value.green { color: var(--green); }
+.stat-value.red { color: var(--red); }
+
+/* TABS */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  gap: 0;
+  background: var(--bg);
+}
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* TAB CONTENT */
+.tab-content { display: none; padding: 1rem; }
+.tab-content.active { display: block; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.section-header h2 { font-size: 1rem; font-weight: 600; color: var(--text); }
+
+h2 { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.75rem; }
+
+/* BUTTONS */
+.btn-add {
+  background: var(--accent);
+  color: #0f0f0f;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-add:active { opacity: 0.85; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #0f0f0f;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+.btn-secondary {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+.btn-danger {
+  background: var(--red);
+  color: #0f0f0f;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* CARDS */
+.cards-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.job-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.job-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+}
+.job-card-name { font-weight: 600; font-size: 1rem; }
+.job-card-type {
+  font-size: 0.72rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.job-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.job-card-financials {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.fin-item { display: flex; flex-direction: column; gap: 2px; }
+.fin-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.fin-value { font-family: var(--mono); font-size: 0.9rem; }
+.fin-value.green { color: var(--green); }
+.fin-value.red { color: var(--red); }
+.fin-value.amber { color: var(--amber); }
+
+.job-card-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.card-btn {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.card-btn.del { color: var(--red); border-color: #3a1f1f; }
+.card-btn:active { opacity: 0.7; }
+
+/* AD CARDS */
+.ad-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.ad-card-left { display: flex; flex-direction: column; gap: 3px; }
+.ad-platform { font-weight: 600; font-size: 0.95rem; }
+.ad-meta { font-size: 0.78rem; color: var(--muted); }
+.ad-card-right { display: flex; align-items: center; gap: 0.75rem; }
+.ad-amount { font-family: var(--mono); font-size: 1rem; color: var(--red); }
+.ad-actions { display: flex; gap: 0.4rem; }
+.icon-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.icon-btn.del { color: var(--red); }
+.icon-btn:active { opacity: 0.7; }
+
+.ads-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* EMPTY */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* SUMMARY */
+.summary-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.breakdown-row.total {
+  background: var(--bg3);
+  border-color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.breakdown-row .mono { font-family: var(--mono); }
+
+.summary-table-wrap { overflow-x: auto; }
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.summary-table th {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.summary-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.summary-table td.name { font-family: var(--font); font-weight: 500; }
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+}
+.modal-box {
+  position: relative;
+  z-index: 1;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding-bottom: 1.5rem;
+}
+.modal-box.small { max-height: auto; }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+  z-index: 1;
+}
+.modal-header h3 { font-size: 1rem; font-weight: 700; }
+.modal-close {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.modal-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.65rem 0.9rem;
+  width: 100%;
+  outline: none;
+  appearance: none;
+  resize: vertical;
+}
+.modal-body textarea { line-height: 1.5; min-height: 80px; }
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus { border-color: var(--accent); }
+.modal-body input::placeholder,
+.modal-body textarea::placeholder { color: var(--muted); }
+
+.labour-calc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0.5rem 0.9rem;
+  background: var(--bg3);
+  border-radius: 8px;
+}
+.labour-calc .mono { font-family: var(--mono); color: var(--amber); font-weight: 500; }
+
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+
+/* MONO / COLOUR */
+.mono { font-family: var(--mono); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.amber { color: var(--amber); }
+
+/* AUTOSAVE TOAST */
+#toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 200;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+@media (min-width: 480px) {
+  .summary-bar { }
+  .stat-value { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <span class="brand-icon">🔧</span>
+        <span class="brand-name">Garage Tracker</span>
+      </div>
+      <div class="week-nav">
+        <button id="prevWeek" class="nav-btn">&#8249;</button>
+        <span id="weekLabel" class="week-label"></span>
+        <button id="nextWeek" class="nav-btn">&#8250;</button>
+      </div>
+    </div>
+    <div class="summary-bar">
+      <div class="stat">
+        <span class="stat-label">Revenue</span>
+        <span class="stat-value green" id="summaryRevenue">£0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Expenses</span>
+        <span class="stat-value red" id="summaryExpenses">£0</span>
+      </div>
+      <div class="stat highlight">
+        <span class="stat-label">Profit</span>
+        <span class="stat-value" id="summaryProfit">£0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">vs last week</span>
+        <span class="stat-value" id="summaryChange">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button class="tab active" data-tab="jobs">Jobs</button>
+      <button class="tab" data-tab="ads">Ads Spend</button>
+      <button class="tab" data-tab="summary">Summary</button>
+    </nav>
+
+    <section id="tab-jobs" class="tab-content active">
+      <div class="section-header">
+        <h2>Jobs this week</h2>
+        <button class="btn-add" id="openAddJob">+ Add Job</button>
+      </div>
+      <div id="jobsList" class="cards-list"></div>
+      <div id="jobsEmpty" class="empty-state" style="display:none">
+        <p>No jobs yet this week.<br/>Tap <strong>+ Add Job</strong> to get started.</p>
+      </div>
+    </section>
+
+    <section id="tab-ads" class="tab-content">
+      <div class="section-header">
+        <h2>Ads spend this week</h2>
+        <button class="btn-add" id="openAddAd">+ Add Spend</button>
+      </div>
+      <div id="adsList" class="cards-list"></div>
+      <div id="adsEmpty" class="empty-state" style="display:none">
+        <p>No ad spend logged this week.</p>
+      </div>
+      <div class="ads-total-bar">
+        <span>Total ads spend</span>
+        <span id="adsTotalDisplay" class="mono red">£0.00</span>
+      </div>
+    </section>
+
+    <section id="tab-summary" class="tab-content">
+      <h2>Week breakdown</h2>
+      <div id="summaryBreakdown" class="summary-breakdown"></div>
+      <h2 style="margin-top:2rem">All jobs this week</h2>
+      <div id="summaryJobsTable" class="summary-table-wrap"></div>
+    </section>
+  </main>
+</div>
+
+<!-- JOB MODAL -->
+<div id="jobModal" class="modal" style="display:none">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="jobModalTitle">Add Job</h3>
+      <button class="modal-close" id="closeJobModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Client name
+        <input type="text" id="jClientName" placeholder="e.g. John Smith"/>
+      </label>
+      <label>Job type
+        <select id="jJobType">
+          <option value="">Select type…</option>
+          <option>Bodywork</option>
+          <option>Paint</option>
+          <option>Full respray</option>
+          <option>Dent repair</option>
+          <option>Welding</option>
+          <option>MOT prep</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Date booked
+        <input type="date" id="jDateBooked"/>
+      </label>
+      <label>Date completed
+        <input type="date" id="jDateCompleted"/>
+      </label>
+      <label>Price charged (£)
+        <input type="number" id="jPrice" placeholder="0.00" min="0" step="0.01"/>
+      </label>
+      <label>Materials cost (£)
+        <input type="number" id="jMaterials" placeholder="0.00" min="0" step="0.01"/>
+      </label>
+      <label>Staff hours worked
+        <input type="number" id="jHours" placeholder="0" min="0" step="0.5"/>
+      </label>
+      <div class="labour-calc" id="labourCalc">Labour cost: <span class="mono" id="labourDisplay">£0.00</span></div>
+      <label>Notes (optional)
+        <textarea id="jNotes" placeholder="Any extra details about this job…" rows="3"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelJobModal">Cancel</button>
+        <button class="btn-primary" id="saveJob">Save Job</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD MODAL -->
+<div id="adModal" class="modal" style="display:none">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="adModalTitle">Add Ad Spend</h3>
+      <button class="modal-close" id="closeAdModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Platform
+        <select id="aPlatform">
+          <option value="">Select platform…</option>
+          <option>Facebook</option>
+          <option>Instagram</option>
+          <option>Google</option>
+          <option>TikTok</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Date
+        <input type="date" id="aDate"/>
+      </label>
+      <label>Amount spent (£)
+        <input type="number" id="aAmount" placeholder="0.00" min="0" step="0.01"/>
+      </label>
+      <label>Notes (optional)
+        <textarea id="aNotes" placeholder="e.g. Instagram boost for May, targeting local area…" rows="3"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelAdModal">Cancel</button>
+        <button class="btn-primary" id="saveAd">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div id="deleteModal" class="modal" style="display:none">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box small">
+    <div class="modal-header">
+      <h3>Delete?</h3>
+    </div>
+    <div class="modal-body">
+      <p id="deleteMsg">Are you sure you want to delete this?</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelDelete">Cancel</button>
+        <button class="btn-danger" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const LABOUR_RATE = 13;
+let state = { jobs: [], ads: [] };
+let currentWeekStart = getWeekStart(new Date());
+let editJobId = null;
+let editAdId = null;
+let pendingDeleteType = null;
+let pendingDeleteId = null;
+
+// ─── Storage ──────────────────────────────────────────────────────────────────
+function save() {
+  localStorage.setItem('garageTracker_v1', JSON.stringify(state));
+  showToast('Saved ✓');
+}
+function load() {
+  try {
+    const d = localStorage.getItem('garageTracker_v1');
+    if (d) state = JSON.parse(d);
+  } catch(e) { state = { jobs: [], ads: [] }; }
+}
+
+// ─── Date Helpers ─────────────────────────────────────────────────────────────
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0) ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function getWeekEnd(weekStart) {
+  const d = new Date(weekStart);
+  d.setDate(d.getDate() + 6);
+  return d;
+}
+function weekKey(weekStart) {
+  return weekStart.toISOString().slice(0,10);
+}
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+function formatWeekLabel(weekStart) {
+  const end = getWeekEnd(weekStart);
+  const now = getWeekStart(new Date());
+  const isThisWeek = weekKey(weekStart) === weekKey(now);
+  const label = `${weekStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+  return isThisWeek ? `This week  •  ${label}` : label;
+}
+function dateInWeek(isoDate, weekStart) {
+  if (!isoDate) return false;
+  const d = new Date(isoDate + 'T00:00:00');
+  const end = getWeekEnd(weekStart);
+  end.setHours(23,59,59,999);
+  return d >= weekStart && d <= end;
+}
+
+// ─── Week Filter ──────────────────────────────────────────────────────────────
+function jobsThisWeek() {
+  return state.jobs.filter(j => dateInWeek(j.dateBooked, currentWeekStart));
+}
+function adsThisWeek() {
+  return state.ads.filter(a => dateInWeek(a.date, currentWeekStart));
+}
+
+// ─── Profit Calc ──────────────────────────────────────────────────────────────
+function jobProfit(job) {
+  const labour = (parseFloat(job.hours) || 0) * LABOUR_RATE;
+  const mats   = parseFloat(job.materials) || 0;
+  const price  = parseFloat(job.price) || 0;
+  return { price, labour, mats, profit: price - labour - mats };
+}
+function weekTotals(jobs, ads) {
+  let revenue = 0, materials = 0, labour = 0, adsTotal = 0;
+  jobs.forEach(j => {
+    const c = jobProfit(j);
+    revenue += c.price; materials += c.mats; labour += c.labour;
+  });
+  ads.forEach(a => adsTotal += parseFloat(a.amount) || 0);
+  return { revenue, materials, labour, adsTotal, profit: revenue - materials - labour - adsTotal };
+}
+
+// ─── Prev Week Profit ─────────────────────────────────────────────────────────
+function prevWeekProfit() {
+  const prev = new Date(currentWeekStart);
+  prev.setDate(prev.getDate() - 7);
+  const pJobs = state.jobs.filter(j => dateInWeek(j.dateBooked, prev));
+  const pAds  = state.ads.filter(a => dateInWeek(a.date, prev));
+  return weekTotals(pJobs, pAds).profit;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function fmt(n) { return '£' + Math.abs(n).toFixed(2); }
+
+function render() {
+  document.getElementById('weekLabel').textContent = formatWeekLabel(currentWeekStart);
+
+  const jobs = jobsThisWeek();
+  const ads  = adsThisWeek();
+  const totals = weekTotals(jobs, ads);
+  const prev   = prevWeekProfit();
+  const diff   = totals.profit - prev;
+  const diffEl = document.getElementById('summaryChange');
+
+  document.getElementById('summaryRevenue').textContent  = fmt(totals.revenue);
+  document.getElementById('summaryExpenses').textContent = fmt(totals.materials + totals.labour + totals.adsTotal);
+  const profEl = document.getElementById('summaryProfit');
+  profEl.textContent = (totals.profit < 0 ? '-' : '') + fmt(totals.profit);
+  profEl.className = 'stat-value ' + (totals.profit >= 0 ? 'green' : 'red');
+
+  if (prev === 0 && totals.profit === 0) {
+    diffEl.textContent = '—'; diffEl.className = 'stat-value';
+  } else {
+    const sign = diff >= 0 ? '+' : '-';
+    diffEl.textContent = sign + fmt(diff);
+    diffEl.className = 'stat-value ' + (diff >= 0 ? 'green' : 'red');
+  }
+
+  renderJobs(jobs);
+  renderAds(ads);
+  renderSummary(jobs, ads, totals);
+}
+
+function renderJobs(jobs) {
+  const list  = document.getElementById('jobsList');
+  const empty = document.getElementById('jobsEmpty');
+  list.innerHTML = '';
+  if (jobs.length === 0) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  jobs.forEach(job => {
+    const c = jobProfit(job);
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.innerHTML = `
+      <div class="job-card-top">
+        <span class="job-card-name">${esc(job.clientName || '—')}</span>
+        <span class="job-card-type">${esc(job.jobType || '—')}</span>
+      </div>
+      <div class="job-card-row">
+        <span>Booked: ${formatDate(job.dateBooked)}</span>
+        <span>Completed: ${formatDate(job.dateCompleted)}</span>
+      </div>
+      <div class="job-card-financials">
+        <div class="fin-item">
+          <span class="fin-label">Revenue</span>
+          <span class="fin-value green">${fmt(c.price)}</span>
+        </div>
+        <div class="fin-item">
+          <span class="fin-label">Expenses</span>
+          <span class="fin-value red">${fmt(c.mats + c.labour)}</span>
+        </div>
+        <div class="fin-item">
+          <span class="fin-label">Profit</span>
+          <span class="fin-value ${c.profit >= 0 ? 'green' : 'red'}">${(c.profit<0?'-':'')+fmt(c.profit)}</span>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem">
+        Mats: ${fmt(c.mats)} · Labour: ${fmt(c.labour)} (${job.hours||0}h × £${LABOUR_RATE})
+      </div>
+      ${job.notes ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;padding:0.5rem 0.75rem;background:var(--bg3);border-radius:6px;border-left:2px solid var(--border);line-height:1.5">${esc(job.notes)}</div>` : ''}
+      <div class="job-card-actions">
+        <button class="card-btn" onclick="openEditJob('${job.id}')">✏️ Edit</button>
+        <button class="card-btn del" onclick="askDelete('job','${job.id}')">🗑 Delete</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function renderAds(ads) {
+  const list  = document.getElementById('adsList');
+  const empty = document.getElementById('adsEmpty');
+  list.innerHTML = '';
+  const total = ads.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  document.getElementById('adsTotalDisplay').textContent = '£'+total.toFixed(2);
+
+  if (ads.length === 0) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  ads.forEach(ad => {
+    const card = document.createElement('div');
+    card.className = 'ad-card';
+    card.innerHTML = `
+      <div class="ad-card-left">
+        <span class="ad-platform">${esc(ad.platform||'—')}</span>
+        <span class="ad-meta">${formatDate(ad.date)}${ad.notes ? ' · '+esc(ad.notes) : ''}</span>
+        ${ad.notes && ad.notes.length > 40 ? `<span style="font-size:0.75rem;color:var(--muted);margin-top:3px;line-height:1.4">${esc(ad.notes)}</span>` : ''}
+      </div>
+      <div class="ad-card-right">
+        <span class="ad-amount">£${parseFloat(ad.amount||0).toFixed(2)}</span>
+        <div class="ad-actions">
+          <button class="icon-btn" onclick="openEditAd('${ad.id}')">✏️</button>
+          <button class="icon-btn del" onclick="askDelete('ad','${ad.id}')">🗑</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function renderSummary(jobs, ads, totals) {
+  const bd = document.getElementById('summaryBreakdown');
+  const prev = prevWeekProfit();
+  const diff = totals.profit - prev;
+  bd.innerHTML = `
+    <div class="breakdown-row">
+      <span>Revenue (${jobs.length} job${jobs.length!==1?'s':''})</span>
+      <span class="mono green">+${fmt(totals.revenue)}</span>
+    </div>
+    <div class="breakdown-row">
+      <span>Materials</span>
+      <span class="mono red">-${fmt(totals.materials)}</span>
+    </div>
+    <div class="breakdown-row">
+      <span>Labour (${jobs.reduce((s,j)=>s+(parseFloat(j.hours)||0),0).toFixed(1)}h × £${LABOUR_RATE})</span>
+      <span class="mono red">-${fmt(totals.labour)}</span>
+    </div>
+    <div class="breakdown-row">
+      <span>Ads spend (${ads.length} entr${ads.length!==1?'ies':'y'})</span>
+      <span class="mono red">-${fmt(totals.adsTotal)}</span>
+    </div>
+    <div class="breakdown-row total">
+      <span>Net profit</span>
+      <span class="mono ${totals.profit>=0?'green':'red'}">${(totals.profit<0?'-':'')+fmt(totals.profit)}</span>
+    </div>
+    <div class="breakdown-row" style="font-size:0.82rem">
+      <span>vs last week</span>
+      <span class="mono ${diff>=0?'green':'red'}">${prev===0&&totals.profit===0?'—':(diff>=0?'+':'-')+fmt(diff)}</span>
+    </div>
+  `;
+
+  const tbl = document.getElementById('summaryJobsTable');
+  if (jobs.length === 0) { tbl.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No jobs this week.</p>'; return; }
+  let rows = jobs.map(j => {
+    const c = jobProfit(j);
+    return `<tr>
+      <td class="name">${esc(j.clientName||'—')}</td>
+      <td>${esc(j.jobType||'—')}</td>
+      <td class="${c.price>0?'green':''}">${fmt(c.price)}</td>
+      <td class="red">${fmt(c.mats+c.labour)}</td>
+      <td class="${c.profit>=0?'green':'red'}">${(c.profit<0?'-':'')+fmt(c.profit)}</td>
+    </tr>`;
+  }).join('');
+  tbl.innerHTML = `<table class="summary-table">
+    <thead><tr><th>Client</th><th>Type</th><th>Revenue</th><th>Expenses</th><th>Profit</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ─── Job Modal ─────────────────────────────────────────────────────────────────
+function openAddJob() {
+  editJobId = null;
+  document.getElementById('jobModalTitle').textContent = 'Add Job';
+  clearJobForm();
+  // default dates to today
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('jDateBooked').value = today;
+  showModal('jobModal');
+}
+function openEditJob(id) {
+  editJobId = id;
+  const job = state.jobs.find(j=>j.id===id);
+  if (!job) return;
+  document.getElementById('jobModalTitle').textContent = 'Edit Job';
+  document.getElementById('jClientName').value  = job.clientName  || '';
+  document.getElementById('jJobType').value     = job.jobType     || '';
+  document.getElementById('jDateBooked').value  = job.dateBooked  || '';
+  document.getElementById('jDateCompleted').value = job.dateCompleted || '';
+  document.getElementById('jPrice').value       = job.price       || '';
+  document.getElementById('jMaterials').value   = job.materials   || '';
+  document.getElementById('jHours').value       = job.hours       || '';
+  document.getElementById('jNotes').value       = job.notes       || '';
+  updateLabourCalc();
+  showModal('jobModal');
+}
+function clearJobForm() {
+  ['jClientName','jDateBooked','jDateCompleted','jPrice','jMaterials','jHours','jNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('jJobType').value = '';
+  document.getElementById('labourDisplay').textContent = '£0.00';
+}
+function updateLabourCalc() {
+  const h = parseFloat(document.getElementById('jHours').value)||0;
+  document.getElementById('labourDisplay').textContent = '£'+(h*LABOUR_RATE).toFixed(2);
+}
+function saveJob() {
+  const clientName    = document.getElementById('jClientName').value.trim();
+  const jobType       = document.getElementById('jJobType').value;
+  const dateBooked    = document.getElementById('jDateBooked').value;
+  const dateCompleted = document.getElementById('jDateCompleted').value;
+  const price         = document.getElementById('jPrice').value;
+  const materials     = document.getElementById('jMaterials').value;
+  const hours         = document.getElementById('jHours').value;
+  const notes         = document.getElementById('jNotes').value.trim();
+  if (!clientName) { alert('Please enter a client name.'); return; }
+  if (editJobId) {
+    const idx = state.jobs.findIndex(j=>j.id===editJobId);
+    if (idx>=0) state.jobs[idx] = { ...state.jobs[idx], clientName, jobType, dateBooked, dateCompleted, price, materials, hours, notes };
+  } else {
+    state.jobs.push({ id: uid(), clientName, jobType, dateBooked, dateCompleted, price, materials, hours, notes });
+  }
+  save(); hideModal('jobModal'); render();
+}
+
+// ─── Ad Modal ─────────────────────────────────────────────────────────────────
+function openAddAd() {
+  editAdId = null;
+  document.getElementById('adModalTitle').textContent = 'Add Ad Spend';
+  ['aPlatform','aDate','aAmount'].forEach(id=>{ const el=document.getElementById(id); el.value=''; });
+  document.getElementById('aNotes').value = '';
+  document.getElementById('aDate').value = new Date().toISOString().slice(0,10);
+  showModal('adModal');
+}
+function openEditAd(id) {
+  editAdId = id;
+  const ad = state.ads.find(a=>a.id===id);
+  if (!ad) return;
+  document.getElementById('adModalTitle').textContent = 'Edit Ad Spend';
+  document.getElementById('aPlatform').value = ad.platform || '';
+  document.getElementById('aDate').value     = ad.date     || '';
+  document.getElementById('aAmount').value   = ad.amount   || '';
+  document.getElementById('aNotes').value    = ad.notes    || '';
+  showModal('adModal');
+}
+function saveAd() {
+  const platform = document.getElementById('aPlatform').value;
+  const date     = document.getElementById('aDate').value;
+  const amount   = document.getElementById('aAmount').value;
+  const notes    = document.getElementById('aNotes').value.trim();
+  if (!platform) { alert('Please select a platform.'); return; }
+  if (!amount)   { alert('Please enter an amount.'); return; }
+  if (editAdId) {
+    const idx = state.ads.findIndex(a=>a.id===editAdId);
+    if (idx>=0) state.ads[idx] = { ...state.ads[idx], platform, date, amount, notes };
+  } else {
+    state.ads.push({ id: uid(), platform, date, amount, notes });
+  }
+  save(); hideModal('adModal'); render();
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────────
+function askDelete(type, id) {
+  pendingDeleteType = type; pendingDeleteId = id;
+  document.getElementById('deleteMsg').textContent =
+    type==='job' ? 'Delete this job? This cannot be undone.' : 'Delete this ad spend? This cannot be undone.';
+  showModal('deleteModal');
+}
+function confirmDelete() {
+  if (pendingDeleteType==='job') state.jobs = state.jobs.filter(j=>j.id!==pendingDeleteId);
+  else                           state.ads  = state.ads.filter(a=>a.id!==pendingDeleteId);
+  save(); hideModal('deleteModal'); render();
+}
+
+// ─── Modal Helpers ─────────────────────────────────────────────────────────────
+function showModal(id) { document.getElementById(id).style.display='flex'; }
+function hideModal(id) { document.getElementById(id).style.display='none'; }
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) { t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1500);
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function initTabs() {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+load();
+initTabs();
+
+// Week nav
+document.getElementById('prevWeek').addEventListener('click',()=>{
+  currentWeekStart.setDate(currentWeekStart.getDate()-7); render();
+});
+document.getElementById('nextWeek').addEventListener('click',()=>{
+  currentWeekStart.setDate(currentWeekStart.getDate()+7); render();
+});
+
+// Job modal
+document.getElementById('openAddJob').addEventListener('click', openAddJob);
+document.getElementById('closeJobModal').addEventListener('click', ()=>hideModal('jobModal'));
+document.getElementById('cancelJobModal').addEventListener('click', ()=>hideModal('jobModal'));
+document.getElementById('saveJob').addEventListener('click', saveJob);
+document.getElementById('jHours').addEventListener('input', updateLabourCalc);
+document.getElementById('jobModal').querySelector('.modal-backdrop').addEventListener('click',()=>hideModal('jobModal'));
+
+// Ad modal
+document.getElementById('openAddAd').addEventListener('click', openAddAd);
+document.getElementById('closeAdModal').addEventListener('click', ()=>hideModal('adModal'));
+document.getElementById('cancelAdModal').addEventListener('click', ()=>hideModal('adModal'));
+document.getElementById('saveAd').addEventListener('click', saveAd);
+document.getElementById('adModal').querySelector('.modal-backdrop').addEventListener('click',()=>hideModal('adModal'));
+
+// Delete
+document.getElementById('cancelDelete').addEventListener('click', ()=>hideModal('deleteModal'));
+document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+document.getElementById('deleteModal').querySelector('.modal-backdrop').addEventListener('click',()=>hideModal('deleteModal'));
+
+// Global edit/delete functions (called from inline onclick)
+window.openEditJob = openEditJob;
+window.openEditAd  = openEditAd;
+window.askDelete   = askDelete;
+
+render();
+</script>
+</body>
+</html>
